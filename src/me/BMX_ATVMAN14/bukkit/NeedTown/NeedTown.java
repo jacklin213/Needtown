@@ -35,6 +35,7 @@ public class NeedTown extends JavaPlugin {
 				+ "config.yml");
 		// If config.yml doesnt exit
 		if (!configfile.exists()) {
+			this.getConfig().set("NeedTownMessage", true);
 			this.getConfig().options().copyDefaults(true);
 			this.saveDefaultConfig();
 		}
@@ -60,37 +61,43 @@ public class NeedTown extends JavaPlugin {
 									+ sb.toString().replaceAll("(&([a-f0-9]))",
 											"\u00A7$2"));
 							plugin.getConfig().set(
-									"NeedTownMessage",
+									"Message",
 									sb.toString().replaceAll("(&([a-f0-9]))",
 											"\u00A7$2"));
 							plugin.saveConfig();
+							return true;
 						}
 					} else {
 						player.sendMessage(ChatColor.RED
 								+ "Error: You do not have permission to do that!");
+						return true;
 					}
 				}
 				
-			String message = this.getConfig().getString("NeedTownMessage");
-			sender.sendMessage(message);
-			} else {
-				player.sendMessage(ChatColor.RED
-						+ "Error: You do not have permission to do that!");
-				return true;
+				if (this.getConfig().getBoolean("NeedTownMessage", true)) {
+					String message = this.getConfig().getString("Message");
+					message = message.replace("%p", player.getName());
+					message.replaceAll("(&([a-f0-9]))", "\u00A7$2");
+					sender.sendMessage(message);
+					return true;
+				} else {
+					return defaultmessage(player);
+				}
 			}
-
+		} else {
+			player.sendMessage(ChatColor.RED
+					+ "Error: You do not have permission to do that!");
+			return true;
 		}
 		return false;
 	}
 
 	public boolean defaultmessage(Player player) {
-		Bukkit.broadcastMessage((new StringBuilder()).append(ChatColor.GOLD)
-				.append(player.getDisplayName()).append(ChatColor.AQUA)
-				.append(" would like to be invited to a town! ")
-				.append(ChatColor.RED).append("Town owners")
-				.append(ChatColor.AQUA).append(" make sure to invite ")
-				.append(ChatColor.GOLD).append(player.getDisplayName())
-				.append(ChatColor.AQUA).append("!").toString());
+		Bukkit.broadcastMessage(ChatColor.GOLD + player.getDisplayName()
+				+ ChatColor.AQUA + " would like to be invited to a town! "
+				+ ChatColor.RED + "Town owners" + ChatColor.AQUA
+				+ " make sure to invite " + ChatColor.GOLD
+				+ player.getDisplayName() + ChatColor.AQUA + "!");
 
 		return true;
 	}
