@@ -1,9 +1,0 @@
-name: NeedTown
-version: 1.0
-main: me.BMX_ATVMAN14.bukkit.NeedTown.NeedTown
-description: Need a town? Just ask for it!
-commands:
-  needtown:
-    description:
-    permission: needtown.use
-    aliases: []
