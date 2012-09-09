@@ -4,9 +4,12 @@ main: me.BMX_ATVMAN14.bukkit.NeedTown.NeedTown
 description: Need a town? Just ask for it!
 commands:
   needtown:
-    description:
+    description: Allows people to use the NeedTown command
     permission: needtown.use
-    aliases: []
+    aliases: nt
+    usage: The correct usage is /needtown or /nt
+  t:
+    description: test command
 
 permissions:
   needtown.*:
@@ -14,10 +17,6 @@ permissions:
     default: op
     children:
       needtown.use: true
-      needtown.setmessage: true
   needtown.use:
     description: Allows people use needtown
-    default: op
-  needtown.setmessage:
-    description: Allows people to set message
     default: op

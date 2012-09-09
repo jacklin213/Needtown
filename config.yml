@@ -1,3 +1,12 @@
 #=== NeedTownConfig made by jacklin213 & BMX_ATVMAN14 ===#
-NeedTownMessage: 
-Message: '&6 %p &b would like to be invited to a town! &4 Town Owners &b be sure to invite &6 %p &b !'
+
+# Set this to true if you want to use custom messsages
+CustomNeedTownMessage: true
+
+# Custom message
+# Put '%p' where you want the player name to appear
+# To use color put the color inbetween brackets like this '<red>' before your message
+
+# Example:
+Message: '<gold>%p <aqua>would like to be invited to a town/city! <red>Town Owners be sure to invite <gold> %p <aqua> !'
+#Message: '%p would like to be invited to a town! Town Owners be sure to invite %p !'

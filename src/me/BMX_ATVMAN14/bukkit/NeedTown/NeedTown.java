@@ -14,6 +14,7 @@ public class NeedTown extends JavaPlugin {
 
 	public final Logger logger = Logger.getLogger("Minecraft");
 	public static NeedTown plugin;
+	PluginDescriptionFile pdfFile;
 
 	public void onDisable() {
 		PluginDescriptionFile pdfFile = getDescription();
@@ -26,70 +27,68 @@ public class NeedTown extends JavaPlugin {
 		logger.info((new StringBuilder(String.valueOf(pdfFile.getName())))
 				.append(" Version").append(pdfFile.getVersion())
 				.append(" Has Been Enabled!").toString());
-
+		createfiles();
 	}
 
-	public void createconfig() {
+	public void createfiles() {
 		// Creates config.yml
 		File configfile = new File(getDataFolder() + File.separator
 				+ "config.yml");
+		File colorfile = new File(getDataFolder() + File.separator
+				+ "colors.txt");
 		// If config.yml doesnt exit
 		if (!configfile.exists()) {
-			this.getConfig().set("NeedTownMessage", true);
+			this.getConfig().getBoolean("NeedTownMessage", true);
 			this.getConfig().options().copyDefaults(true);
 			this.saveDefaultConfig();
+		}
+		if (!colorfile.exists()) {
+			this.getFile().mkdirs();
+			this.getLogger().info("Generating reqired files....");
+			this.getLogger().info("Reqired files Generated");
 		}
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd,
 			String commandLabel, String args[]) {
-		Player player = (Player) sender;
-		if (player.hasPermission("needtown.use")) {
-			if (cmd.getName().equalsIgnoreCase("needtown")) {
-				if (args.length > 1) {
-					if (!(sender.hasPermission("needtown.setmessage"))) {
-						if (args[0].equalsIgnoreCase("setmessage")) {
-							StringBuilder sb = new StringBuilder();
-							for (int i = 0; i < args.length; i++) {
-								if (i != 0) {
-									sb.append(' ');
-								}
-								sb.append(args);
-							}
-							sender.sendMessage(plugin.getName()
-									+ " The message has been changed to: "
-									+ sb.toString().replaceAll("(&([a-f0-9]))",
-											"\u00A7$2"));
-							plugin.getConfig().set(
-									"Message",
-									sb.toString().replaceAll("(&([a-f0-9]))",
-											"\u00A7$2"));
-							plugin.saveConfig();
-							return true;
-						}
-					} else {
-						player.sendMessage(ChatColor.RED
-								+ "Error: You do not have permission to do that!");
+		if (cmd.getName().equalsIgnoreCase("t")){
+		    String myString = "This <red>message <yellow>is <light_purple>AWESOME!";
+		    sender.sendMessage(format(myString));
+		}
+		if (sender instanceof Player) {
+			Player player = (Player) sender;
+			if (player.hasPermission("needtown.use")) {
+				if (cmd.getName().equalsIgnoreCase("needtown")
+						|| cmd.getName().equalsIgnoreCase("nt")) {
+					if (this.getConfig().getBoolean("CustomNeedTownMessage",
+							true)) {
+						String message = this.getConfig().getString("Message");
+						message = message.replace("%p", player.getName());
+						player.sendMessage(format(message));
 						return true;
+					} else if (this.getConfig().getBoolean(
+							"CustomNeedTownMessage", false)) {
+						return defaultmessage(player);
 					}
 				}
-				
-				if (this.getConfig().getBoolean("NeedTownMessage", true)) {
-					String message = this.getConfig().getString("Message");
-					message = message.replace("%p", player.getName());
-					message.replaceAll("(&([a-f0-9]))", "\u00A7$2");
-					sender.sendMessage(message);
-					return true;
-				} else {
-					return defaultmessage(player);
-				}
+			} else {
+				player.sendMessage(ChatColor.RED
+						+ "Error: You do not have permission to do that!");
+				return true;
 			}
 		} else {
-			player.sendMessage(ChatColor.RED
-					+ "Error: You do not have permission to do that!");
-			return true;
+			sender.sendMessage("This is a player only command");
 		}
+
 		return false;
+	}
+
+	public static String format(String string) {
+		String s = string;
+		for (ChatColor color : ChatColor.values()) {
+			s = s.replaceAll("(?i)<" + color.name() + ">", "" + color);
+		}
+		return s;
 	}
 
 	public boolean defaultmessage(Player player) {
@@ -101,5 +100,11 @@ public class NeedTown extends JavaPlugin {
 
 		return true;
 	}
+
+	/*
+	 * For String format usage String message =
+	 * this.getConfig().getString("Message"); this.getConfig().set("Message",
+	 * format(message));
+	 */
 
 }
