@@ -51,24 +51,37 @@ public class NeedTown extends JavaPlugin {
 
 	public boolean onCommand(CommandSender sender, Command cmd,
 			String commandLabel, String args[]) {
-		if (cmd.getName().equalsIgnoreCase("t")){
-		    String myString = "This <red>message <yellow>is <light_purple>AWESOME!";
-		    sender.sendMessage(format(myString));
-		}
 		if (sender instanceof Player) {
 			Player player = (Player) sender;
 			if (player.hasPermission("needtown.use")) {
 				if (cmd.getName().equalsIgnoreCase("needtown")
 						|| cmd.getName().equalsIgnoreCase("nt")) {
-					if (this.getConfig().getBoolean("CustomNeedTownMessage",
-							true)) {
-						String message = this.getConfig().getString("Message");
-						message = message.replace("%p", player.getName());
-						player.sendMessage(format(message));
-						return true;
-					} else if (this.getConfig().getBoolean(
-							"CustomNeedTownMessage", false)) {
-						return defaultmessage(player);
+					if (args.length == 1) {
+						if (player.hasPermission("needtown.reload")) {
+							if (args[0].equalsIgnoreCase("reload")) {
+								this.reloadConfig();
+								String string = "<red>[ <aqua>Need <yellow>Town <red>] <green>Config reloaded!";
+								sender.sendMessage(format(string));
+								return true;
+							}
+						} else {
+							player.sendMessage(ChatColor.RED
+									+ "Error: You do not have permission to do that!");
+							return true;
+						}
+					} else {
+						if (this.getConfig().getBoolean(
+								"CustomNeedTownMessage", true)) {
+							String message = this.getConfig().getString(
+									"Message");
+							message = message.replace("%p", player.getName());
+							player.sendMessage(format(message));
+							return true;
+						} else if (this.getConfig().getBoolean(
+								"CustomNeedTownMessage", false)) {
+							return defaultmessage(player);
+						}
+
 					}
 				}
 			} else {

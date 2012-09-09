@@ -1,5 +1,5 @@
 name: NeedTown
-version: 1.0
+version: 2.3
 main: me.BMX_ATVMAN14.bukkit.NeedTown.NeedTown
 description: Need a town? Just ask for it!
 commands:
@@ -8,8 +8,6 @@ commands:
     permission: needtown.use
     aliases: nt
     usage: The correct usage is /needtown or /nt
-  t:
-    description: test command
 
 permissions:
   needtown.*:
@@ -19,4 +17,7 @@ permissions:
       needtown.use: true
   needtown.use:
     description: Allows people use needtown
+    default: op
+  needtown.reload:
+    description: Allows people to reload config
     default: op
