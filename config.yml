@@ -1,0 +1,17 @@
+#=== NeedTownConfig made by jacklin213 & BMX_ATVMAN14 ===#
+
+# Set this to true if you want to use custom messsages
+CustomNeedTownMessage: true
+
+# Custom message
+# Put '%p' where you want the player name to appear
+# To use color put the color inbetween brackets like this '<red>' before your message
+
+# Example:
+
+#Message: '<gold>%p <green>needs a town/city! <red>Town Owners <green>plz be sure to invite <gold>%p <aqua>!'
+Message: '<gold>%p <aqua>would like to be invited to a town/city! <red>Town Owners <aqua>plz be sure to invite <gold>%p <aqua>!'
+
+# Remeber to only have 1 message. If you have 2 messages it will read it as a error and send you the default message
+
+# Plugin/config Copyright 2012 NeedTown Team
