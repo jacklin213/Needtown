@@ -1,6 +1,9 @@
 package me.BMX_ATVMAN14.bukkit.NeedTown;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -15,6 +18,7 @@ public class NeedTown extends JavaPlugin {
 	public final Logger logger = Logger.getLogger("Minecraft");
 	public static NeedTown plugin;
 	PluginDescriptionFile pdfFile;
+	private File colorFile;
 
 	public void onDisable() {
 		PluginDescriptionFile pdfFile = getDescription();
@@ -34,17 +38,33 @@ public class NeedTown extends JavaPlugin {
 		// Creates config.yml
 		File configfile = new File(getDataFolder() + File.separator
 				+ "config.yml");
-		File colorfile = new File(getDataFolder() + File.separator
-				+ "colors.txt");
+		this.colorFile = new File(getDataFolder()  + File.separator + "colors.yml");
 		// If config.yml doesnt exit
 		if (!configfile.exists()) {
 			this.getConfig().getBoolean("NeedTownMessage", true);
 			this.getConfig().options().copyDefaults(true);
 			this.saveDefaultConfig();
 		}
-		if (!colorfile.exists()) {
-			this.getFile().mkdirs();
-			this.getLogger().info("Generating reqired files....");
+		if (!colorFile.exists()) {
+			try {
+		        this.logger.info("[NeedTown] Generating colors.yml");
+		        PrintStream out = new PrintStream(new FileOutputStream(this.colorFile));
+		        out.println("# ======= Color.yml ======= #");
+		        out.println("# Do not edit any thing in here or else you won't know the colors");
+		        out.println("# This is a Color.yml for NeedTown");
+		        out.println("List of colors:");
+		        out.println("<red> - Color Red");
+		        out.println("<yellow> - Color Yellow");
+		        out.println("<green> - Color Green");
+		        out.println("<gold> - Color Gold");
+		        out.println("# These are the only ones tested so far, feel free too try them yourself");
+		        out.println();
+		        out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");	
+		        out.close();
+		      } catch (IOException e) {
+		        this.logger.severe((new StringBuilder(String.valueOf(pdfFile.getName())))
+						.append("Error in creating file !").toString());
+		      }
 			this.getLogger().info("Reqired files Generated");
 		}
 	}
