@@ -1,7 +1,10 @@
 name: NeedTown
-version: 2.3
+version: 2.3.2
 main: me.BMX_ATVMAN14.bukkit.NeedTown.NeedTown
 description: Need a town? Just ask for it!
+author: BMX_ATVMAN14
+authors: [BMX_ATVMAN14, jacklin213]
+
 commands:
   needtown:
     description: Allows people to use the NeedTown command

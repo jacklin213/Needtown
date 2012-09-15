@@ -38,7 +38,8 @@ public class NeedTown extends JavaPlugin {
 		// Creates config.yml
 		File configfile = new File(getDataFolder() + File.separator
 				+ "config.yml");
-		this.colorFile = new File(getDataFolder()  + File.separator + "colors.yml");
+		this.colorFile = new File(getDataFolder() + File.separator
+				+ "colors.yml");
 		// If config.yml doesnt exit
 		if (!configfile.exists()) {
 			this.getConfig().getBoolean("NeedTownMessage", true);
@@ -47,24 +48,38 @@ public class NeedTown extends JavaPlugin {
 		}
 		if (!colorFile.exists()) {
 			try {
-		        this.logger.info("[NeedTown] Generating colors.yml");
-		        PrintStream out = new PrintStream(new FileOutputStream(this.colorFile));
-		        out.println("# ======= Color.yml ======= #");
-		        out.println("# Do not edit any thing in here or else you won't know the colors");
-		        out.println("# This is a Color.yml for NeedTown");
-		        out.println("List of colors:");
-		        out.println("<red> - Color Red");
-		        out.println("<yellow> - Color Yellow");
-		        out.println("<green> - Color Green");
-		        out.println("<gold> - Color Gold");
-		        out.println("# These are the only ones tested so far, feel free too try them yourself");
-		        out.println();
-		        out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");	
-		        out.close();
-		      } catch (IOException e) {
-		        this.logger.severe((new StringBuilder(String.valueOf(pdfFile.getName())))
-						.append("Error in creating file !").toString());
-		      }
+				this.logger.info("[NeedTown] Generating colors.yml");
+				PrintStream out = new PrintStream(new FileOutputStream(
+						this.colorFile));
+				out.println("# ======= Color.yml ======= #");
+				out.println("# Do not edit any thing in here or else you won't know the colors");
+				out.println("# This is a Color.yml for NeedTown");
+				out.println("List of colors:");
+				out.println("<red> - Color Red");
+				out.println("<dark_red> - Color DarkRed");
+				out.println("<green> - Color Green");
+				out.println("<dark_green> - Color Dark-Green");
+				out.println("<aqua> - Color Aqua");
+				out.println("<dark_aqua> - Color Dark-Aqua");
+				out.println("<blue> - Color Gold");
+				out.println("<dark_blue> - Color Dark-Blue");
+				out.println("<yellow> - Color Yellow");
+				out.println("<gold> - Color Gold");
+				out.println("<white> - Color White");
+				out.println("<black> - Color Black");
+				out.println("<light_purple> - Color Light-Purple");
+				out.println("<dark_purple> - Color Dark-Purple");
+				out.println("<gray> - Color Gray");
+				out.println("<dark_gray> - Color Dark-Grey");
+				out.println("# These are the only ones tested so far, feel free too try them yourself");
+				out.println();
+				out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");
+				out.close();
+			} catch (IOException e) {
+				this.logger.severe((new StringBuilder(String.valueOf(pdfFile
+						.getName()))).append("Error in creating file !")
+						.toString());
+			}
 			this.getLogger().info("Reqired files Generated");
 		}
 	}
@@ -89,20 +104,18 @@ public class NeedTown extends JavaPlugin {
 									+ "Error: You do not have permission to do that!");
 							return true;
 						}
-					} else {
-						if (this.getConfig().getBoolean(
-								"CustomNeedTownMessage", true)) {
-							String message = this.getConfig().getString(
-									"Message");
-							message = message.replace("%p", player.getName());
-							player.sendMessage(format(message));
-							return true;
-						} else if (this.getConfig().getBoolean(
-								"CustomNeedTownMessage", false)) {
-							return defaultmessage(player);
-						}
-
 					}
+
+					if (this.getConfig().getBoolean("CustomNeedTownMessage",
+							true)) {
+						String message = this.getConfig().getString("Message");
+						message = message.replace("%p", player.getName());
+						player.sendMessage(format(message));
+						return true;
+					} else {
+						return defaultmessage(player);
+					}
+
 				}
 			} else {
 				player.sendMessage(ChatColor.RED
