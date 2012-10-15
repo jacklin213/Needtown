@@ -21,17 +21,15 @@ public class NeedTown extends JavaPlugin {
 	private File colorFile;
 
 	public void onDisable() {
-		PluginDescriptionFile pdfFile = getDescription();
-		logger.info((new StringBuilder(String.valueOf(pdfFile.getName())))
-				.append(" Has Been Disabled!").toString());
+
+		logger.info(String.format("[%s] Disabled Version %s", getDescription()
+				.getName(), getDescription().getVersion()));
 	}
 
 	public void onEnable() {
-		PluginDescriptionFile pdfFile = getDescription();
-		logger.info((new StringBuilder(String.valueOf(pdfFile.getName())))
-				.append(" Version").append(pdfFile.getVersion())
-				.append(" Has Been Enabled!").toString());
-		createfiles();
+
+		logger.info(String.format("[%s] Enabled Version %s by jacklin213", getDescription()
+				.getName(), getDescription().getVersion()));
 	}
 
 	public void createfiles() {
@@ -110,7 +108,7 @@ public class NeedTown extends JavaPlugin {
 							true)) {
 						String message = this.getConfig().getString("Message");
 						message = message.replace("%p", player.getName());
-						player.sendMessage(format(message));
+						Bukkit.broadcastMessage(format(message));
 						return true;
 					} else {
 						return defaultmessage(player);
