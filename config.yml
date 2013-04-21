@@ -3,6 +3,10 @@
 # Set this to true if you want to use custom messsages
 CustomNeedTownMessage: true
 
+cooldowntimer: true
+# In seconds
+cooldown time: 60
+
 # Custom message
 # Put '%p' where you want the player name to appear
 # To use color put the color inbetween brackets like this '<red>' before your message
