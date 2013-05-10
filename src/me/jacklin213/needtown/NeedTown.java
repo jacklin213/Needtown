@@ -1,32 +1,32 @@
 package me.jacklin213.needtown;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
-import me.jacklin213.needtown.ultis.ConfigAccessor;
+import me.jacklin213.needtown.utils.UpdateChecker;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class NeedTown extends JavaPlugin {
 
 	public static NeedTown plugin;
-	public ConfigAccessor ca;
-	public final Logger logger = Logger.getLogger("Minecraft");	
-	PluginDescriptionFile pdfFile;
-	private File colorFile;
-	private File nameFile;
-	int timer;
 	
+	public final Logger logger = Logger.getLogger("Minecraft");	
+	public String chatPluginName = ChatColor.RED + "[" + ChatColor.AQUA + "Need"+ ChatColor.YELLOW +"Town" + ChatColor.RED + "] ";
+	private File colorFile;
+	public UpdateChecker updateChecker;
+	
+	private List<String> cantDoCommand = new ArrayList<String>();
 
 	public void onDisable() {
 		logger.info(String.format("[%s] Disabled Version %s", getDescription()
@@ -34,6 +34,15 @@ public class NeedTown extends JavaPlugin {
 	}
 
 	public void onEnable() {
+		/*Boolean updateCheck = Boolean.valueOf(getConfig().getBoolean("UpdateCheck"));
+		 
+		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/server-mods/needtown/files.rss");
+
+		if ((updateCheck) && (this.updateChecker.updateNeeded())) {
+			this.logger.info(String.format("[%s] A new update is avalible, Version: %s", getDescription().getName(), this.updateChecker.getVersion()));
+			this.logger.info(String.format("[%s] Get it now from: %s", getDescription().getName(), this.updateChecker.getLink()));
+		}*/
+		
 		logger.info(String.format("[%s] Enabled Version %s by jacklin213",
 				getDescription().getName(), getDescription().getVersion()));
 		createfiles();
@@ -45,119 +54,121 @@ public class NeedTown extends JavaPlugin {
 				+ "config.yml");
 		this.colorFile = new File(getDataFolder() + File.separator
 				+ "colors.yml");
-		this.nameFile = new File(getDataFolder() + File.separator
-				+ "PlayerNames.yml");
 		// If config.yml doesnt exit
-		if (!configfile.exists()) {
-			this.getConfig().options().copyDefaults(true);
-			this.saveDefaultConfig();
-		}
-		if (!nameFile.exists()) {
-			try{
-				this.logger.info("[NeedTown] Generating PlayerNames.yml");
-				PrintStream out = new PrintStream(new FileOutputStream(
-						this.nameFile));
-				out.println("# ======= PlayerNames.yml ======= #");
-				out.println("# DO NOT edit any thing in here or unless you know what you are doing");
-				out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");
-			} catch (IOException e) {
-				this.logger.severe((new StringBuilder(String.valueOf(pdfFile
-						.getName()))).append("Error in creating file !")
-						.toString());
+		if (!configfile.exists() || !colorFile.exists()){
+			if (!configfile.exists()) {
+				this.getConfig().options().copyDefaults(true);
+				this.saveDefaultConfig();
 			}
-		}
-		if (!colorFile.exists()) {
-			try {
-				this.logger.info("[NeedTown] Generating colors.yml");
-				PrintStream out = new PrintStream(new FileOutputStream(
-						this.colorFile));
-				out.println("# ======= Color.yml ======= #");
-				out.println("# Do not edit any thing in here or else you won't know the colors");
-				out.println("# This is a Color.yml for NeedTown");
-				out.println("List of colors:");
-				out.println("<red> - Color Red");
-				out.println("<dark_red> - Color DarkRed");
-				out.println("<green> - Color Green");
-				out.println("<dark_green> - Color Dark-Green");
-				out.println("<aqua> - Color Aqua");
-				out.println("<dark_aqua> - Color Dark-Aqua");
-				out.println("<blue> - Color Gold");
-				out.println("<dark_blue> - Color Dark-Blue");
-				out.println("<yellow> - Color Yellow");
-				out.println("<gold> - Color Gold");
-				out.println("<white> - Color White");
-				out.println("<black> - Color Black");
-				out.println("<light_purple> - Color Light-Purple");
-				out.println("<dark_purple> - Color Dark-Purple");
-				out.println("<gray> - Color Gray");
-				out.println("<dark_gray> - Color Dark-Grey");
-				out.println("# These are the only ones tested so far, feel free too try them yourself");
-				out.println();
-				out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");
-				out.close();
-			} catch (IOException e) {
-				this.logger.severe((new StringBuilder(String.valueOf(pdfFile
-						.getName()))).append("Error in creating file !")
-						.toString());
-			}
-			
-		}
-		this.getLogger().info("Reqired files Generated");
-	}
-
-	public boolean onCommand(CommandSender sender, Command cmd,
-			String commandLabel, String args[]) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			if (player.hasPermission("needtown.use")) {
-				if (cmd.getName().equalsIgnoreCase("needtown")
-						|| cmd.getName().equalsIgnoreCase("nt")) {
-					if (args.length == 1) {
-						if (player.hasPermission("needtown.reload")) {
-							if (args[0].equalsIgnoreCase("reload")) {
-								this.reloadConfig();
-								String string = "<red>[ <aqua>Need <yellow>Town <red>] <green>Config reloaded!";
-								sender.sendMessage(format(string));
-								return true;
-							}
-						} else {
-							player.sendMessage(ChatColor.RED
-									+ "Error: You do not have permission to do that!");
-							return true;
-						}
-					}
-
-					if (this.getConfig().getBoolean("CustomNeedTownMessage",
-							true)) {
-						String message = this.getConfig().getString("Message");
-						message = message.replace("%p", player.getName());
-						Bukkit.broadcastMessage(format(message));
-						return true;
-					} else if (!this.getConfig().getBoolean("CustomNeedTownMessage",
-							true)) {
-						return defaultmessage(player);
-					}
-				String pname = sender.getName();
+			if (!colorFile.exists()) {
 				try {
-					append(nameFile, pname);	
-				} catch (Exception e) {
-					String errorMessage = "<red>[ <aqua>Need <yellow>Town <red>] <White>" + pname + "<red>Could not be saved onto PlayerName.yml!";
-					Bukkit.broadcast(format(errorMessage),"needtown.op");
+					this.logger.info("[NeedTown] Generating colors.yml");
+					PrintStream out = new PrintStream(new FileOutputStream(
+							this.colorFile));
+					out.println("# ======= Color.yml ======= #");
+					out.println("# Do not edit any thing in here or else you won't know the colors");
+					out.println("# This is a Color.yml for NeedTown");
+					out.println("List of colors:");
+					out.println("<red> - Color Red");
+					out.println("<dark_red> - Color DarkRed");
+					out.println("<green> - Color Green");
+					out.println("<dark_green> - Color Dark-Green");
+					out.println("<aqua> - Color Aqua");
+					out.println("<dark_aqua> - Color Dark-Aqua");
+					out.println("<blue> - Color Gold");
+					out.println("<dark_blue> - Color Dark-Blue");
+					out.println("<yellow> - Color Yellow");
+					out.println("<gold> - Color Gold");
+					out.println("<white> - Color White");
+					out.println("<black> - Color Black");
+					out.println("<light_purple> - Color Light-Purple");
+					out.println("<dark_purple> - Color Dark-Purple");
+					out.println("<gray> - Color Gray");
+					out.println("<dark_gray> - Color Dark-Grey");
+					out.println("# These are the only ones tested so far, feel free too try them yourself");
+					out.println();
+					out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");
+					out.close();
+				} catch (IOException e) {
+					this.logger.severe(String.format("[%s] Error in creating file !", getDescription().getName()));
 				}
 				
-				}
-			} else {
-				player.sendMessage(ChatColor.RED
-						+ "Error: You do not have permission to do that!");
-				return true;
 			}
-		} else {
-			sender.sendMessage("This is a player only command");
-			return true;
+			
+			this.getLogger().info("Reqired files Generated");
 		}
-
-		return false;
 	}
+
+	  public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		  boolean useCooldown = getConfig().getBoolean("Cooldowns");
+		  int cdTime = (getCooldownTime() * 20);
+		  if ((sender instanceof Player)) {
+			  Player player = (Player)sender;
+			  final String playerName = player.getName();
+			  if (player.hasPermission("needtown.use")) {
+				  if ((cmd.getName().equalsIgnoreCase("needtown")) || 
+						  (cmd.getName().equalsIgnoreCase("nt"))) {
+					  if (args.length == 1) {
+						  if (player.hasPermission("needtown.reload")) {
+							  if (args[0].equalsIgnoreCase("reload")) {
+								  reloadConfig();
+								  String string = "<green>Config reloaded!";
+								  sender.sendMessage(chatPluginName + format(string));
+								  return true;
+							  }
+						  } else {
+							  player.sendMessage(ChatColor.RED + "Error: You do not have permission to do that!");
+							  return true;
+						  }
+					  }
+					  if (useCooldown){
+						  if (!cantDoCommand.contains(playerName)){
+							  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
+								  String message = chatPluginName + (getConfig().getString("Message"));
+								  message = message.replace("%p", player.getName());
+								  Bukkit.broadcastMessage(format(message));
+								  cantDoCommand.add(playerName);
+								  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+									  public void run(){
+										  cantDoCommand.remove(playerName);
+									  }
+								  }, cdTime);
+								  return true;
+							  } else {
+								  cantDoCommand.add(playerName);
+								  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+									  public void run(){
+										  cantDoCommand.remove(playerName);
+									  }
+								  }, cdTime);
+								  return defaultmessage(player); 
+							  }
+						  } else {
+							  String message = getConfig().getString("Cooldown-Message");
+							  player.sendMessage(chatPluginName + format(message));
+							  return true;
+						  }
+					  } else {
+						  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
+							  String message = chatPluginName + (getConfig().getString("Message"));
+							  message = message.replace("%p", player.getName());
+							  Bukkit.broadcastMessage(format(message));
+							  return true;
+						  } else {
+							  return defaultmessage(player); 
+						  }
+					  }
+				  }
+			  } else {
+				  player.sendMessage(ChatColor.RED + "Error: You do not have permission to do that!");
+				  return true;
+			  }
+		  } else {
+			  sender.sendMessage("This is a player only command");
+			  return true;
+		  }
+		  return false;
+	  }
 
 	public static String format(String string) {
 		String s = string;
@@ -168,7 +179,7 @@ public class NeedTown extends JavaPlugin {
 	}
 
 	public boolean defaultmessage(Player player) {
-		Bukkit.broadcastMessage(ChatColor.GOLD + player.getDisplayName()
+		Bukkit.broadcastMessage(chatPluginName + ChatColor.GOLD + player.getDisplayName()
 				+ ChatColor.AQUA + " would like to be invited to a town! "
 				+ ChatColor.RED + "Town owners" + ChatColor.AQUA
 				+ " make sure to invite " + ChatColor.GOLD
@@ -177,18 +188,17 @@ public class NeedTown extends JavaPlugin {
 		return true;
 	}
 	
-	  public static void append(File aFile, String content) {
-		    try {
-		      PrintStream p = new PrintStream(new BufferedOutputStream(new FileOutputStream(aFile, true)));
-		      p.println(content);
-		      p.close();
-
-		    } catch (Exception e) {
-		      e.printStackTrace();
-		      System.err.println(aFile);
-		    }
-		  }
-
+	public int getCooldownTime(){
+		int cdTime;
+		try {
+			cdTime = Integer.parseInt(getConfig().getString("Cooldown-time"));
+			return cdTime;
+		} catch (NumberFormatException e){
+			this.logger.info(String.format("[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
+			this.logger.info(String.format("[%s] Please fix and reload the plugin", getDescription().getName()));
+		}	
+		return 0;
+	}
 		
 
 	/*

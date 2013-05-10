@@ -1,11 +1,15 @@
-#=== NeedTownConfig made by jacklin213 & BMX_ATVMAN14 ===#
+#===== NeedTown - Config =====#
+#~~~~ Made by jacklin213 ~~~~#
 
 # Set this to true if you want to use custom messsages
 CustomNeedTownMessage: true
 
-cooldowntimer: true
+# Use Cooldowns: true / false
+Cooldowns: true
 # In seconds
-cooldown time: 60
+Cooldown-time: 10
+# Cooldown message:
+Cooldown-Message: '<red>This command is on Cooldown!'
 
 # Custom message
 # Put '%p' where you want the player name to appear
