@@ -15,16 +15,24 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.palmergames.bukkit.towny.Towny;
+import com.palmergames.bukkit.towny.object.Resident;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 public class NeedTown extends JavaPlugin {
 
 	public static NeedTown plugin;
 	
 	public final Logger logger = Logger.getLogger("Minecraft");	
-	public String chatPluginName = ChatColor.RED + "[" + ChatColor.AQUA + "Need"+ ChatColor.YELLOW +"Town" + ChatColor.RED + "] ";
-	private File colorFile;
+	public String chatPluginPrefix;
 	public UpdateChecker updateChecker;
+	private Towny towny = null;
+	private File colorFile;
+	public PluginManager pm;
 	
 	private List<String> cantDoCommand = new ArrayList<String>();
 
@@ -34,17 +42,40 @@ public class NeedTown extends JavaPlugin {
 	}
 
 	public void onEnable() {
-		/*Boolean updateCheck = Boolean.valueOf(getConfig().getBoolean("UpdateCheck"));
+		
+		pm = getServer().getPluginManager();
+		
+		Boolean useTowny = getConfig().getBoolean("TownyIntegration");
+		
+		// Update Check
+		Boolean updateCheck = Boolean.valueOf(getConfig().getBoolean("UpdateCheck"));
 		 
 		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/server-mods/needtown/files.rss");
 
 		if ((updateCheck) && (this.updateChecker.updateNeeded())) {
 			this.logger.info(String.format("[%s] A new update is avalible, Version: %s", getDescription().getName(), this.updateChecker.getVersion()));
 			this.logger.info(String.format("[%s] Get it now from: %s", getDescription().getName(), this.updateChecker.getLink()));
-		}*/
+		}
+		
+		// Checks for towny
+		if (useTowny){
+			checkPlugins();
+			if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)){
+				/*
+				 *  We either failed to find Towny
+				 *  or the Scheduler failed to register the task.
+				 */
+				logger.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
+				logger.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+				pm.disablePlugin(this);
+				return;
+			}
+		}
 		
 		logger.info(String.format("[%s] Enabled Version %s by jacklin213",
 				getDescription().getName(), getDescription().getVersion()));
+		
+		// Creates Config.yml + Colors.yml
 		createfiles();
 	}
 
@@ -100,20 +131,32 @@ public class NeedTown extends JavaPlugin {
 	}
 
 	  public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+		  // Gets things needed from Config
 		  boolean useCooldown = getConfig().getBoolean("Cooldowns");
+		  boolean useTowny = getConfig().getBoolean("TownyIntegration");
 		  int cdTime = (getCooldownTime() * 20);
-		  if ((sender instanceof Player)) {
+		  chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
+		  // Check if sender is a player
+		  if (commandLabel.equalsIgnoreCase("needtownr") || commandLabel.equalsIgnoreCase("ntr")){
+			  if (sender.hasPermission("needtown.reload")){
+				  if (sender instanceof Player){
+					  sender.sendMessage(chatPluginPrefix + "Console only command!"); 
+					  return true;
+				  }
+				  reloadNTConsole(sender);
+				  return true;
+			  }
+		  }
+		  if (sender instanceof Player) {
 			  Player player = (Player)sender;
 			  final String playerName = player.getName();
 			  if (player.hasPermission("needtown.use")) {
-				  if ((cmd.getName().equalsIgnoreCase("needtown")) || 
-						  (cmd.getName().equalsIgnoreCase("nt"))) {
+				  if ((cmd.getName().equalsIgnoreCase("needtown")) || (cmd.getName().equalsIgnoreCase("nt"))) {
+					  
 					  if (args.length == 1) {
 						  if (player.hasPermission("needtown.reload")) {
 							  if (args[0].equalsIgnoreCase("reload")) {
-								  reloadConfig();
-								  String string = "<green>Config reloaded!";
-								  sender.sendMessage(chatPluginName + format(string));
+								  reloadNT(sender);
 								  return true;
 							  }
 						  } else {
@@ -121,44 +164,35 @@ public class NeedTown extends JavaPlugin {
 							  return true;
 						  }
 					  }
-					  if (useCooldown){
-						  if (!cantDoCommand.contains(playerName)){
-							  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
-								  String message = chatPluginName + (getConfig().getString("Message"));
-								  message = message.replace("%p", player.getName());
-								  Bukkit.broadcastMessage(format(message));
-								  cantDoCommand.add(playerName);
-								  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
-									  public void run(){
-										  cantDoCommand.remove(playerName);
-									  }
-								  }, cdTime);
+					  
+					  // Using Towny (begin)
+					  if (useTowny){
+						  List<Resident> residentList = TownyUniverse.getDataSource().getResidentsWithoutTown();
+						  if (!residentList.contains(player)){
+							  player.sendMessage(chatPluginPrefix + "You cannot use this command because you are already in a town!"); 
+							  return true;
+						  } else {
+							  if (useCooldown){
+								  runCommandWithCD(playerName, player, cdTime);
 								  return true;
 							  } else {
-								  cantDoCommand.add(playerName);
-								  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
-									  public void run(){
-										  cantDoCommand.remove(playerName);
-									  }
-								  }, cdTime);
-								  return defaultmessage(player); 
+								  runCommand(player);
+								  return true;
 							  }
-						  } else {
-							  String message = getConfig().getString("Cooldown-Message");
-							  player.sendMessage(chatPluginName + format(message));
-							  return true;
 						  }
 					  } else {
-						  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
-							  String message = chatPluginName + (getConfig().getString("Message"));
-							  message = message.replace("%p", player.getName());
-							  Bukkit.broadcastMessage(format(message));
+					// Using Towny (end)
+						  //Without towny
+						  if (useCooldown){
+							  runCommandWithCD(playerName, player, cdTime);
 							  return true;
 						  } else {
-							  return defaultmessage(player); 
+							 runCommand(player);
+							 return true;
 						  }
 					  }
 				  }
+				 
 			  } else {
 				  player.sendMessage(ChatColor.RED + "Error: You do not have permission to do that!");
 				  return true;
@@ -169,7 +203,12 @@ public class NeedTown extends JavaPlugin {
 		  }
 		  return false;
 	  }
-
+		  
+	/**
+	 * Gets message from config and formats it (Grabs colors)
+	 * @param string - The message
+	 * @return Formatted Message
+	 */
 	public static String format(String string) {
 		String s = string;
 		for (ChatColor color : ChatColor.values()) {
@@ -178,8 +217,14 @@ public class NeedTown extends JavaPlugin {
 		return s;
 	}
 
+	/**
+	 * The default NeedTown message if none is specified in the config or if the config is broken
+	 * @param player who issued the command
+	 * @return Default NeedTown Message
+	 */
 	public boolean defaultmessage(Player player) {
-		Bukkit.broadcastMessage(chatPluginName + ChatColor.GOLD + player.getDisplayName()
+		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
+		Bukkit.broadcastMessage(chatPluginPrefix + ChatColor.GOLD + player.getDisplayName()
 				+ ChatColor.AQUA + " would like to be invited to a town! "
 				+ ChatColor.RED + "Town owners" + ChatColor.AQUA
 				+ " make sure to invite " + ChatColor.GOLD
@@ -187,6 +232,11 @@ public class NeedTown extends JavaPlugin {
 
 		return true;
 	}
+	
+	/**
+	 * Gets the cooldown time from config
+	 * @return Cooldown time
+	 */
 	
 	public int getCooldownTime(){
 		int cdTime;
@@ -199,7 +249,127 @@ public class NeedTown extends JavaPlugin {
 		}	
 		return 0;
 	}
-		
+	
+	
+	/**
+	 * Runs the NeedTown command with cooldown.
+	 * @param playerName who issued the command
+	 * @param player who issued the command 
+	 * @param cdTime from config
+	 * @return Command issued
+	 */
+	
+	public boolean runCommandWithCD(final String playerName, Player player, int cdTime){
+		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
+		if (!cantDoCommand.contains(playerName)){
+			  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
+				  String message = chatPluginPrefix + (getConfig().getString("Message"));
+				  message = message.replace("%p", player.getName());
+				  Bukkit.broadcastMessage(format(message));
+				  cantDoCommand.add(playerName);
+				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+					  public void run(){
+						  cantDoCommand.remove(playerName);
+					  }
+				  }, cdTime);
+				  return true;
+			  } else {
+				  cantDoCommand.add(playerName);
+				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+					  public void run(){
+						  cantDoCommand.remove(playerName);
+					  }
+				  }, cdTime);
+				  return defaultmessage(player); 
+			  }
+		  } else {
+			  String message = getConfig().getString("Cooldown-Message");
+			  player.sendMessage(chatPluginPrefix + format(message));
+			  return true;
+		  }
+	}
+	
+	/**
+	 * Runs the Needtown command with no cooldown
+	 * @param player who issued the command
+	 * @return Command issued
+	 */
+	
+	public boolean runCommand(Player player){
+		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
+		 if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
+			  String message = chatPluginPrefix + (getConfig().getString("Message"));
+			  message = message.replace("%p", player.getName());
+			  Bukkit.broadcastMessage(format(message));
+			  return true;
+		  } else {
+			  return defaultmessage(player); 
+		  }
+	}
+	
+	private void checkPlugins() {
+        Plugin test;
+        
+        pm = getServer().getPluginManager();
+        test = pm.getPlugin("Towny");
+        if (test != null && test instanceof Towny)
+        	towny = (Towny)test;
+
+	}
+	
+	protected Towny getTowny() {
+		return towny;
+	}
+	
+	/**
+	 * Runs the reload for player
+	 * @param useTowny - After config is reloaded, check if they enabled towny
+	 * @param sender - CommandSender (Should be player)
+	 */
+	
+	public void reloadNT(CommandSender sender){
+		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
+		reloadConfig();
+		boolean useTowny = getConfig().getBoolean("TownyIntegration");
+		  String string = "<green>Config reloaded!";
+		  if (useTowny){
+				checkPlugins();
+				if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)){
+					/*
+					 *  We either failed to find Towny
+					 *  or the Scheduler failed to register the task.
+					 */
+					logger.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
+					logger.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+					pm.disablePlugin(this);
+				}
+			}
+		  sender.sendMessage(chatPluginPrefix + format(string));
+	}
+	
+	/**
+	 * Runs the reload for console
+	 * @param useTowny - After config is reloaded, check if they enabled towny
+	 * @param sender - CommandSender (Should be console)
+	 */
+	public void reloadNTConsole(CommandSender sender){
+		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
+		reloadConfig();
+		boolean useTowny = getConfig().getBoolean("TownyIntegration");
+		  if (useTowny){
+				checkPlugins();
+				if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)){
+					/*
+					 *  We either failed to find Towny
+					 *  or the Scheduler failed to register the task.
+					 */
+					logger.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
+					logger.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+					pm.disablePlugin(this);
+				}
+			}
+		  logger.info(String.format("[%s] Config Reloaded!", getDescription().getName()));
+	}
 
 	/*
 	 * For String format usage String message =
