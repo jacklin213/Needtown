@@ -225,7 +225,7 @@ public class NeedTown extends JavaPlugin {
 	/**
 	 * Gets message from config and formats it (Grabs colors).
 	 * 
-	 * @param string - The message
+	 * @param string The message to format
 	 * @return Formatted Message
 	 */
 	public static String format(String string) {
@@ -237,20 +237,18 @@ public class NeedTown extends JavaPlugin {
 	}
 
 	/**
-	 * The default NeedTown message if none is specified in the config or if the config is broken.
+	 * Broadcasts the default NeedTown message if none is specified in the config 
+	 * or if the config is broken.
 	 * 
 	 * @param player Who issued the command
-	 * @return Default NeedTown Message
 	 */
-	public boolean defaultmessage(Player player) {
+	public void broadcastDefaultmessage(Player player) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		Bukkit.broadcastMessage(chatPluginPrefix + ChatColor.GOLD + player.getDisplayName()
 				+ ChatColor.AQUA + " would like to be invited to a town! "
 				+ ChatColor.RED + "Town owners" + ChatColor.AQUA
 				+ " make sure to invite " + ChatColor.GOLD
 				+ player.getDisplayName() + ChatColor.AQUA + "!");
-
-		return true;
 	}
 	
 	/**
@@ -281,7 +279,7 @@ public class NeedTown extends JavaPlugin {
 	 * @param cdTime Cooldown time obtained from config
 	 * @return the success boolean outcome of the command
 	 */
-	public boolean runCommandWithCD(final String playerName, Player player, int cdTime) {
+	public void runCommandWithCD(final String playerName, Player player, int cdTime) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		if (!cantDoCommand.contains(playerName)) {
 			  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
@@ -294,7 +292,6 @@ public class NeedTown extends JavaPlugin {
 						  cantDoCommand.remove(playerName);
 					  }
 				  }, cdTime);
-				  return true;
 			  } else {
 				  cantDoCommand.add(playerName);
 				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
@@ -302,12 +299,11 @@ public class NeedTown extends JavaPlugin {
 						  cantDoCommand.remove(playerName);
 					  }
 				  }, cdTime);
-				  return defaultmessage(player); 
+				  broadcastDefaultmessage(player); 
 			  }
 		  } else {
 			  String message = getConfig().getString("Cooldown-Message");
 			  player.sendMessage(chatPluginPrefix + format(message));
-			  return true;
 		  }
 	}
 	
@@ -315,18 +311,16 @@ public class NeedTown extends JavaPlugin {
 	 * Runs the Needtown command with no cooldown
 	 * 
 	 * @param player who issued the command
-	 * @return Command issued
 	 */
 	
-	public boolean runCommand(Player player) {
+	public void runCommand(Player player) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		 if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
 			  String message = chatPluginPrefix + (getConfig().getString("Message"));
 			  message = message.replace("%p", player.getName());
 			  Bukkit.broadcastMessage(format(message));
-			  return true;
 		  } else {
-			  return defaultmessage(player); 
+			  broadcastDefaultmessage(player); 
 		  }
 	}
 	
