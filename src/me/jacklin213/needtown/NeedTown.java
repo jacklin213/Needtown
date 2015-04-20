@@ -298,6 +298,7 @@ public class NeedTown extends JavaPlugin {
 				  }, cdTime);
 				  broadcastDefaultmessage(player); 
 			  }
+			  users.add(player.getUniqueId());
 		  } else {
 			  String message = getConfig().getString("Cooldown-Message");
 			  player.sendMessage(chatPluginPrefix + format(message));
@@ -312,13 +313,14 @@ public class NeedTown extends JavaPlugin {
 	
 	public void runCommand(Player player) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
-		 if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
-			  String message = chatPluginPrefix + (getConfig().getString("Message"));
-			  message = message.replace("%p", player.getName());
-			  Bukkit.broadcastMessage(format(message));
-		  } else {
-			  broadcastDefaultmessage(player); 
-		  }
+		if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
+			String message = chatPluginPrefix + (getConfig().getString("Message"));
+			message = message.replace("%p", player.getName());
+			Bukkit.broadcastMessage(format(message));
+		} else {
+			broadcastDefaultmessage(player); 
+		}
+		users.add(player.getUniqueId());
 	}
 	
 	private void checkPlugins() {
