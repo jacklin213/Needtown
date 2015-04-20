@@ -259,7 +259,7 @@ public class NeedTown extends JavaPlugin {
 	public int getCooldownTime(){
 		int cdTime;
 		try {
-			cdTime = Integer.parseInt(getConfig().getString("Cooldown-time"));
+			cdTime = Integer.parseInt(getConfig().getString("Cooldown-Time"));
 			return cdTime;
 		} catch (NumberFormatException e){
 			this.log.info(String.format(

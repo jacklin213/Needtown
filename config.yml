@@ -13,7 +13,7 @@ CustomNeedTownMessage: true
 # Use Cooldowns: true / false
 Cooldowns: true
 # In seconds
-Cooldown-time: 10
+Cooldown-Time: 10
 # Cooldown message:
 Cooldown-Message: '<red>This command is on Cooldown!'
 
