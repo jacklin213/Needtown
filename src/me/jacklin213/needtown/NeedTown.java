@@ -163,25 +163,15 @@ public class NeedTown extends JavaPlugin {
 						  if (!residentList.contains(player)){
 							  player.sendMessage(chatPluginPrefix + "You cannot use this command because you are already in a town!"); 
 							  return true;
-						  } else {
-							  if (useCooldown){
-								  runCommandWithCD(playerName, player, cdTime);
-								  return true;
-							  } else {
-								  runCommand(player);
-								  return true;
-							  }
-						  }
+						  } 
+					  } 
+					  
+					  if (useCooldown){
+						  runCommandWithCD(playerName, player, cdTime);
+						  return true;
 					  } else {
-					// Using Towny (end)
-						  //Without towny
-						  if (useCooldown){
-							  runCommandWithCD(playerName, player, cdTime);
-							  return true;
-						  } else {
-							 runCommand(player);
-							 return true;
-						  }
+						 runCommand(player);
+						 return true;
 					  }
 				  }
 				 
