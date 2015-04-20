@@ -60,9 +60,9 @@ public class NeedTown extends JavaPlugin {
 		this.updateCheck(updateCheck, autoUpdate, 41673);
 
 		// Checks for towny
-		if (useTowny){
+		if (useTowny) {
 			checkPlugins();
-			if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)){
+			if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)) {
 				/*
 				 *  We either failed to find Towny
 				 *  or the Scheduler failed to register the task.
@@ -159,9 +159,9 @@ public class NeedTown extends JavaPlugin {
 		  int cdTime = (getCooldownTime() * 20);
 		  chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		  // Check if sender is a player
-		  if (commandLabel.equalsIgnoreCase("needtownr") || commandLabel.equalsIgnoreCase("ntr")){
-			  if (sender.hasPermission("needtown.reload")){
-				  if (sender instanceof Player){
+		  if (commandLabel.equalsIgnoreCase("needtownr") || commandLabel.equalsIgnoreCase("ntr")) {
+			  if (sender.hasPermission("needtown.reload")) {
+				  if (sender instanceof Player) {
 					  sender.sendMessage(chatPluginPrefix + "Console only command!"); 
 					  return true;
 				  }
@@ -195,14 +195,14 @@ public class NeedTown extends JavaPlugin {
 					  }
 					  
 					  // Using Towny (begin)
-					  if (useTowny){
+					  if (useTowny) {
 						 if (this.hasTown(player)) {
 							  player.sendMessage(chatPluginPrefix + "You cannot use this command because you are already in a town!"); 
 							  return true;
 						 }
 					  } 
 					  
-					  if (useCooldown){
+					  if (useCooldown) {
 						  runCommandWithCD(playerName, player, cdTime);
 						  return true;
 					  } else {
@@ -223,7 +223,8 @@ public class NeedTown extends JavaPlugin {
 	  }
 		  
 	/**
-	 * Gets message from config and formats it (Grabs colors)
+	 * Gets message from config and formats it (Grabs colors).
+	 * 
 	 * @param string - The message
 	 * @return Formatted Message
 	 */
@@ -236,8 +237,9 @@ public class NeedTown extends JavaPlugin {
 	}
 
 	/**
-	 * The default NeedTown message if none is specified in the config or if the config is broken
-	 * @param player who issued the command
+	 * The default NeedTown message if none is specified in the config or if the config is broken.
+	 * 
+	 * @param player Who issued the command
 	 * @return Default NeedTown Message
 	 */
 	public boolean defaultmessage(Player player) {
@@ -252,16 +254,17 @@ public class NeedTown extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the cooldown time from config
-	 * @return Cooldown time
+	 * Gets the cooldown time from config.
+	 * 
+	 * @return cooldown time
 	 */
 	
-	public int getCooldownTime(){
+	public int getCooldownTime() {
 		int cdTime;
 		try {
 			cdTime = Integer.parseInt(getConfig().getString("Cooldown-Time"));
 			return cdTime;
-		} catch (NumberFormatException e){
+		} catch (NumberFormatException e) {
 			this.log.info(String.format(
 					"[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
 			this.log.info(String.format("[%s] Please fix and reload the plugin", getDescription().getName()));
@@ -272,29 +275,29 @@ public class NeedTown extends JavaPlugin {
 	
 	/**
 	 * Runs the NeedTown command with cooldown.
-	 * @param playerName who issued the command
-	 * @param player who issued the command 
-	 * @param cdTime from config
-	 * @return Command issued
+	 * 
+	 * @param playerName Name of Player that issued the command
+	 * @param player Who issued the command 
+	 * @param cdTime Cooldown time obtained from config
+	 * @return the success boolean outcome of the command
 	 */
-	
-	public boolean runCommandWithCD(final String playerName, Player player, int cdTime){
+	public boolean runCommandWithCD(final String playerName, Player player, int cdTime) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
-		if (!cantDoCommand.contains(playerName)){
+		if (!cantDoCommand.contains(playerName)) {
 			  if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
 				  String message = chatPluginPrefix + (getConfig().getString("Message"));
 				  message = message.replace("%p", player.getName());
 				  Bukkit.broadcastMessage(format(message));
 				  cantDoCommand.add(playerName);
-				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
-					  public void run(){
+				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+					  public void run() {
 						  cantDoCommand.remove(playerName);
 					  }
 				  }, cdTime);
 				  return true;
 			  } else {
 				  cantDoCommand.add(playerName);
-				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable(){
+				  Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 					  public void run(){
 						  cantDoCommand.remove(playerName);
 					  }
@@ -310,11 +313,12 @@ public class NeedTown extends JavaPlugin {
 	
 	/**
 	 * Runs the Needtown command with no cooldown
+	 * 
 	 * @param player who issued the command
 	 * @return Command issued
 	 */
 	
-	public boolean runCommand(Player player){
+	public boolean runCommand(Player player) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		 if (getConfig().getBoolean("CustomNeedTownMessage", true)) {
 			  String message = chatPluginPrefix + (getConfig().getString("Message"));
@@ -342,18 +346,19 @@ public class NeedTown extends JavaPlugin {
 	
 	/**
 	 * Runs the reload for player
+	 * 
 	 * @param useTowny - After config is reloaded, check if they enabled towny
 	 * @param sender - CommandSender (Should be player)
 	 */
 	
-	public void reloadNT(CommandSender sender){
+	public void reloadNT(CommandSender sender) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		reloadConfig();
 		boolean useTowny = getConfig().getBoolean("TownyIntegration");
 		  String string = "<green>Config reloaded!";
-		  if (useTowny){
+		  if (useTowny) {
 				checkPlugins();
-				if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)){
+				if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)) {
 					/*
 					 *  We either failed to find Towny
 					 *  or the Scheduler failed to register the task.
@@ -368,16 +373,17 @@ public class NeedTown extends JavaPlugin {
 	
 	/**
 	 * Runs the reload for console
+	 * 
 	 * @param useTowny - After config is reloaded, check if they enabled towny
 	 * @param sender - CommandSender (Should be console)
 	 */
-	public void reloadNTConsole(CommandSender sender){
+	public void reloadNTConsole(CommandSender sender) {
 		chatPluginPrefix = format(getConfig().getString("PluginPrefix")) + " ";
 		reloadConfig();
 		boolean useTowny = getConfig().getBoolean("TownyIntegration");
-		  if (useTowny){
+		  if (useTowny) {
 				checkPlugins();
-				if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)){
+				if ((towny == null) || (getServer().getScheduler().scheduleSyncDelayedTask(this, new onLoadedTask(this),1) == -1)) {
 					/*
 					 *  We either failed to find Towny
 					 *  or the Scheduler failed to register the task.
@@ -403,29 +409,28 @@ public class NeedTown extends JavaPlugin {
 
 	/*
 	 * For String format usage String message =
-	 * this.getConfig().getString("Message"); this.getConfig().set("Message",
-	 * format(message));
+	 * this.getConfig().getString("Message"); this.getConfig().set("Message", format(message));
 	 */
 
-	private void updateCheck(boolean updateCheck, boolean autoUpdate, int ID){
-		if(updateCheck && (autoUpdate == false)){
+	private void updateCheck(boolean updateCheck, boolean autoUpdate, int ID) {
+		if(updateCheck && (autoUpdate == false)) {
 			updater = new Updater(this, ID, this.getFile(), UpdateType.NO_DOWNLOAD, true);
 			if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
 			    log.info("New version available! " + updater.getLatestName());
 			}
-			if (updater.getResult() == UpdateResult.NO_UPDATE){
+			if (updater.getResult() == UpdateResult.NO_UPDATE) {
 				log.info(String.format("You are running the latest version of %s", getDescription().getName()));
 			}
 		}
-		if(autoUpdate && (updateCheck == false)){
+		if(autoUpdate && (updateCheck == false)) {
 			updater = new Updater(this, ID, this.getFile(), UpdateType.NO_VERSION_CHECK, true);
 		} 
-		if(autoUpdate && updateCheck){
+		if(autoUpdate && updateCheck) {
 			updater = new Updater(this, ID, this.getFile(), UpdateType.DEFAULT, true);
 			if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
 			    log.info("New version available! " + updater.getLatestName());
 			}
-			if (updater.getResult() == UpdateResult.NO_UPDATE){
+			if (updater.getResult() == UpdateResult.NO_UPDATE) {
 				log.info(String.format("You are running the latest version of %s", getDescription().getName()));
 			}
 		}
