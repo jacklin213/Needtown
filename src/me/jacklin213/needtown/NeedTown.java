@@ -67,15 +67,13 @@ public class NeedTown extends JavaPlugin {
 				 *  We either failed to find Towny
 				 *  or the Scheduler failed to register the task.
 				 */
-				log.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
-				log.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+				log.severe("Could not find Towny, disabling plugin...");
 				pm.disablePlugin(this);
 				return;
 			}
 		}
 		
-		log.info(String.format("[%s] Enabled Version %s by jacklin213",
-				getDescription().getName(), getDescription().getVersion()));
+		log.info(String.format("Enabled Version %s by jacklin213", getDescription().getVersion()));
 		
 		// Creates Config.yml + Colors.yml
 		createfiles();
@@ -148,7 +146,7 @@ public class NeedTown extends JavaPlugin {
 				this.log.info("Reqired files Generated");
 			}
 		} catch (IOException e) {
-			this.log.severe(String.format("[%s] Error in creating file !", getDescription().getName()));
+			this.log.severe("Error in creating file !");
 		}
 	}
 
@@ -263,9 +261,8 @@ public class NeedTown extends JavaPlugin {
 			cdTime = Integer.parseInt(getConfig().getString("Cooldown-Time"));
 			return cdTime;
 		} catch (NumberFormatException e) {
-			this.log.info(String.format(
-					"[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
-			this.log.info(String.format("[%s] Please fix and reload the plugin", getDescription().getName()));
+			this.log.info("Error in loading the Cooldown value in the config");
+			this.log.info("Please fix and reload the plugin");
 		}	
 		return 0;
 	}
@@ -357,8 +354,7 @@ public class NeedTown extends JavaPlugin {
 					 *  We either failed to find Towny
 					 *  or the Scheduler failed to register the task.
 					 */
-					log.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
-					log.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+					log.severe("Could not find Towny, disabling plugin...");
 					pm.disablePlugin(this);
 				}
 			}
@@ -382,12 +378,11 @@ public class NeedTown extends JavaPlugin {
 					 *  We either failed to find Towny
 					 *  or the Scheduler failed to register the task.
 					 */
-					log.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
-					log.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+					log.severe("Could not find Towny, disabling plugin...");
 					pm.disablePlugin(this);
 				}
 			}
-		  log.info(String.format("[%s] Config Reloaded!", getDescription().getName()));
+		  log.info("Config Reloaded!");
 	}
 	
 	@SuppressWarnings("deprecation")
