@@ -159,11 +159,10 @@ public class NeedTown extends JavaPlugin {
 					  
 					  // Using Towny (begin)
 					  if (useTowny){
-						  List<Resident> residentList = TownyUniverse.getDataSource().getResidentsWithoutTown();
-						  if (!residentList.contains(player)){
+						 if (this.hasTown(player)) {
 							  player.sendMessage(chatPluginPrefix + "You cannot use this command because you are already in a town!"); 
 							  return true;
-						  } 
+						 }
 					  } 
 					  
 					  if (useCooldown){
@@ -351,6 +350,17 @@ public class NeedTown extends JavaPlugin {
 				}
 			}
 		  log.info(String.format("[%s] Config Reloaded!", getDescription().getName()));
+	}
+	
+	@SuppressWarnings("deprecation")
+	private boolean hasTown(Player player) {
+		List<Resident> noTown = TownyUniverse.getDataSource().getResidentsWithoutTown();
+		for (Resident resident : noTown) {
+			if (Bukkit.getPlayer(resident.getName()).getUniqueId() == player.getUniqueId()) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/*
