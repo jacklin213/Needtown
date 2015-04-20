@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import me.jacklin213.needtown.utils.UpdateChecker;
+import me.jacklin213.needtown.utils.Updater;
+import me.jacklin213.needtown.utils.Updater.UpdateResult;
+import me.jacklin213.needtown.utils.Updater.UpdateType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -27,36 +29,26 @@ public class NeedTown extends JavaPlugin {
 
 	public static NeedTown plugin;
 	
-	public final Logger logger = Logger.getLogger("Minecraft");	
+	public Logger log;
 	public String chatPluginPrefix;
-	public UpdateChecker updateChecker;
+	public Updater updater;
 	private Towny towny = null;
 	private File colorFile;
 	public PluginManager pm;
 	
 	private List<String> cantDoCommand = new ArrayList<String>();
 
-	public void onDisable() {
-		logger.info(String.format("[%s] Disabled Version %s", getDescription()
-				.getName(), getDescription().getVersion()));
-	}
-
 	public void onEnable() {
-		
+		log = getLogger();
 		pm = getServer().getPluginManager();
 		
 		Boolean useTowny = getConfig().getBoolean("TownyIntegration");
 		
-		// Update Check
+		//Update Check
 		Boolean updateCheck = Boolean.valueOf(getConfig().getBoolean("UpdateCheck"));
-		 
-		this.updateChecker = new UpdateChecker(this, "http://dev.bukkit.org/server-mods/needtown/files.rss");
+		Boolean autoUpdate = Boolean.valueOf(getConfig().getBoolean("AutoUpdate"));
+		this.updateCheck(updateCheck, autoUpdate, 41673);
 
-		if ((updateCheck) && (this.updateChecker.updateNeeded())) {
-			this.logger.info(String.format("[%s] A new update is avalible, Version: %s", getDescription().getName(), this.updateChecker.getVersion()));
-			this.logger.info(String.format("[%s] Get it now from: %s", getDescription().getName(), this.updateChecker.getLink()));
-		}
-		
 		// Checks for towny
 		if (useTowny){
 			checkPlugins();
@@ -65,14 +57,14 @@ public class NeedTown extends JavaPlugin {
 				 *  We either failed to find Towny
 				 *  or the Scheduler failed to register the task.
 				 */
-				logger.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
-				logger.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+				log.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
+				log.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
 				pm.disablePlugin(this);
 				return;
 			}
 		}
 		
-		logger.info(String.format("[%s] Enabled Version %s by jacklin213",
+		log.info(String.format("[%s] Enabled Version %s by jacklin213",
 				getDescription().getName(), getDescription().getVersion()));
 		
 		// Creates Config.yml + Colors.yml
@@ -93,7 +85,7 @@ public class NeedTown extends JavaPlugin {
 			}
 			if (!colorFile.exists()) {
 				try {
-					this.logger.info("[NeedTown] Generating colors.yml");
+					log.info("[NeedTown] Generating colors.yml");
 					PrintStream out = new PrintStream(new FileOutputStream(
 							this.colorFile));
 					out.println("# ======= Color.yml ======= #");
@@ -121,12 +113,12 @@ public class NeedTown extends JavaPlugin {
 					out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");
 					out.close();
 				} catch (IOException e) {
-					this.logger.severe(String.format("[%s] Error in creating file !", getDescription().getName()));
+					this.log.severe(String.format("[%s] Error in creating file !", getDescription().getName()));
 				}
 				
 			}
 			
-			this.getLogger().info("Reqired files Generated");
+			this.log.info("Reqired files Generated");
 		}
 	}
 
@@ -244,8 +236,8 @@ public class NeedTown extends JavaPlugin {
 			cdTime = Integer.parseInt(getConfig().getString("Cooldown-time"));
 			return cdTime;
 		} catch (NumberFormatException e){
-			this.logger.info(String.format("[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
-			this.logger.info(String.format("[%s] Please fix and reload the plugin", getDescription().getName()));
+			this.log.info(String.format("[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
+			this.log.info(String.format("[%s] Please fix and reload the plugin", getDescription().getName()));
 		}	
 		return 0;
 	}
@@ -339,8 +331,8 @@ public class NeedTown extends JavaPlugin {
 					 *  We either failed to find Towny
 					 *  or the Scheduler failed to register the task.
 					 */
-					logger.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
-					logger.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+					log.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
+					log.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
 					pm.disablePlugin(this);
 				}
 			}
@@ -363,12 +355,12 @@ public class NeedTown extends JavaPlugin {
 					 *  We either failed to find Towny
 					 *  or the Scheduler failed to register the task.
 					 */
-					logger.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
-					logger.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
+					log.severe(String.format("[%s] Could not find Towny, disabling plugin...", getDescription().getName()));
+					log.severe(String.format("[%s] is now Disabled", getDescription().getName()));;
 					pm.disablePlugin(this);
 				}
 			}
-		  logger.info(String.format("[%s] Config Reloaded!", getDescription().getName()));
+		  log.info(String.format("[%s] Config Reloaded!", getDescription().getName()));
 	}
 
 	/*
@@ -377,4 +369,27 @@ public class NeedTown extends JavaPlugin {
 	 * format(message));
 	 */
 
+	private void updateCheck(boolean updateCheck, boolean autoUpdate, int ID){
+		if(updateCheck && (autoUpdate == false)){
+			updater = new Updater(this, ID, this.getFile(), UpdateType.NO_DOWNLOAD, true);
+			if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
+			    log.info("New version available! " + updater.getLatestName());
+			}
+			if (updater.getResult() == UpdateResult.NO_UPDATE){
+				log.info(String.format("You are running the latest version of %s", getDescription().getName()));
+			}
+		}
+		if(autoUpdate && (updateCheck == false)){
+			updater = new Updater(this, ID, this.getFile(), UpdateType.NO_VERSION_CHECK, true);
+		} 
+		if(autoUpdate && updateCheck){
+			updater = new Updater(this, ID, this.getFile(), UpdateType.DEFAULT, true);
+			if (updater.getResult() == UpdateResult.UPDATE_AVAILABLE) {
+			    log.info("New version available! " + updater.getLatestName());
+			}
+			if (updater.getResult() == UpdateResult.NO_UPDATE){
+				log.info(String.format("You are running the latest version of %s", getDescription().getName()));
+			}
+		}
+	}
 }

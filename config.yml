@@ -28,4 +28,10 @@ Message: '<gold>%p <aqua>would like to be invited to a town/city! <red>Town Owne
 
 # Remeber to only have 1 message. If you have 2 messages it will read it as a error and send you the default message
 
-# Plugin/config Copyright 2012 NeedTown Team
+# Check for updates?
+UpdateCheck: true
+
+# Automaticly download update?
+AutoUpdate: true
+
+# Plugin/config Copyright 2015 NeedTown Team
