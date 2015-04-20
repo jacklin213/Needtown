@@ -1,8 +1,8 @@
 #===== NeedTown - Config =====#
 #~~~~ Made by jacklin213 ~~~~#
 
-# Integrate with Towny? (Currently very buggy USE AT OWN RISK)
-TownyIntegration: false
+# Integrate with Towny? (Needtown v2.7 and above)
+TownyIntegration: true
 
 # NeedTown Prefix
 PluginPrefix: '<red>[<aqua>Need<yellow>Town<red>]'
