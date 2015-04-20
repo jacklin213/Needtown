@@ -17,6 +17,9 @@ Cooldown-time: 10
 # Cooldown message:
 Cooldown-Message: '<red>This command is on Cooldown!'
 
+# Period(minutes) to save users to userfile. Default is 10 mintues
+Save-Period: 10
+
 # Custom message
 # Put '%p' where you want the player name to appear
 # To use color put the color inbetween brackets like this '<red>' before your message

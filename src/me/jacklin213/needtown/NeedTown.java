@@ -1,11 +1,13 @@
 package me.jacklin213.needtown;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import me.jacklin213.needtown.utils.Updater;
@@ -16,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -33,11 +36,18 @@ public class NeedTown extends JavaPlugin {
 	public String chatPluginPrefix;
 	public Updater updater;
 	private Towny towny = null;
-	private File colorFile;
+	private File colorFile, usersFile;
 	public PluginManager pm;
 	
 	private List<String> cantDoCommand = new ArrayList<String>();
+	private List<UUID> users = new ArrayList<UUID>();
 
+	@Override
+	public void onDisable() {
+		saveUsers();
+		super.onDisable();
+	}
+	
 	public void onEnable() {
 		log = getLogger();
 		pm = getServer().getPluginManager();
@@ -69,25 +79,47 @@ public class NeedTown extends JavaPlugin {
 		
 		// Creates Config.yml + Colors.yml
 		createfiles();
+		
+		if (usersFile.exists())
+			for (String uuid : YamlConfiguration.loadConfiguration(usersFile).getKeys(false))
+				users.add(UUID.fromString(uuid));
+		
+		getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+			public void run() {
+				saveUsers();
+			}
+		}, 0, getConfig().getInt("Save-Period") * 60 * 20);
+	}
+	
+	private void saveUsers() {
+		try {
+			PrintStream out = new PrintStream(new FileOutputStream(usersFile));
+			for (UUID uuid : users) 
+				out.println(uuid.toString());
+			out.close();
+			log.info("Saving users...");
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void createfiles() {
-		// Creates config.yml
-		File configfile = new File(getDataFolder() + File.separator
-				+ "config.yml");
-		this.colorFile = new File(getDataFolder() + File.separator
-				+ "colors.yml");
-		// If config.yml doesnt exit
-		if (!configfile.exists() || !colorFile.exists()){
-			if (!configfile.exists()) {
-				this.getConfig().options().copyDefaults(true);
-				this.saveDefaultConfig();
-			}
-			if (!colorFile.exists()) {
-				try {
+		try {
+			// Creates config.yml
+			File configfile = new File(getDataFolder() + File.separator	+ "config.yml");
+			this.colorFile = new File(getDataFolder() + File.separator + "colors.yml");
+			this.usersFile = new File(getDataFolder() + File.separator + "users.yml");
+			// If config.yml doesnt exit
+			if (!configfile.exists() || !colorFile.exists() || !usersFile.exists()) {
+				if (!configfile.exists()) {
+					this.getConfig().options().copyDefaults(true);
+					this.saveDefaultConfig();
+				}
+				if (!usersFile.exists()) 
+					usersFile.createNewFile();
+				if (!colorFile.exists()) {
 					log.info("[NeedTown] Generating colors.yml");
-					PrintStream out = new PrintStream(new FileOutputStream(
-							this.colorFile));
+					PrintStream out = new PrintStream(new FileOutputStream(this.colorFile));
 					out.println("# ======= Color.yml ======= #");
 					out.println("# Do not edit any thing in here or else you won't know the colors");
 					out.println("# This is a Color.yml for NeedTown");
@@ -110,15 +142,13 @@ public class NeedTown extends JavaPlugin {
 					out.println("<dark_gray> - Color Dark-Grey");
 					out.println("# These are the only ones tested so far, feel free too try them yourself");
 					out.println();
-					out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2012");
+					out.println("# Copyright BMX_ATVMAN14,jacklin213,LinCraft,LinProdutions 2015");
 					out.close();
-				} catch (IOException e) {
-					this.log.severe(String.format("[%s] Error in creating file !", getDescription().getName()));
 				}
-				
+				this.log.info("Reqired files Generated");
 			}
-			
-			this.log.info("Reqired files Generated");
+		} catch (IOException e) {
+			this.log.severe(String.format("[%s] Error in creating file !", getDescription().getName()));
 		}
 	}
 
@@ -151,6 +181,13 @@ public class NeedTown extends JavaPlugin {
 								  reloadNT(sender);
 								  return true;
 							  }
+						  } else if (player.hasPermission("needtown.users")) {
+							  player.sendMessage(ChatColor.YELLOW + "Players who need a town: ");
+							  if (users.size() == 0) 
+								  player.sendMessage("None");
+							  else
+								  for (UUID uuid : users)
+									  player.sendMessage(Bukkit.getPlayer(uuid).getName());
 						  } else {
 							  player.sendMessage(ChatColor.RED + "Error: You do not have permission to do that!");
 							  return true;
@@ -225,7 +262,8 @@ public class NeedTown extends JavaPlugin {
 			cdTime = Integer.parseInt(getConfig().getString("Cooldown-time"));
 			return cdTime;
 		} catch (NumberFormatException e){
-			this.log.info(String.format("[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
+			this.log.info(String.format(
+					"[%s] Error in loading the Cooldown value in the config", getDescription().getName()));
 			this.log.info(String.format("[%s] Please fix and reload the plugin", getDescription().getName()));
 		}	
 		return 0;

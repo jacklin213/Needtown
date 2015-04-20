@@ -23,6 +23,7 @@ permissions:
     default: op
     children:
       needtown.use: true
+      needtown.users: true
       needtown.reload: true
       needtown.op: true
   needtown.op:
@@ -30,10 +31,14 @@ permissions:
     default: op
     children:
       needtown.use: true
+      needtown.users: true
       needtown.reload: true
   needtown.use:
     description: Allows people use needtown
     default: true
+  needtown.users:
+    description: Allows people to list users who need a town
+    default: op
   needtown.reload:
     description: Allows people to reload config
     default: op
